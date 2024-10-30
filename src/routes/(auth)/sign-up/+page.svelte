@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { getErrorMessage } from '$lib/authUtils';
 	import { signUpUser } from '$lib/firebase/auth';
 	import { redirect } from '@sveltejs/kit';
@@ -24,7 +25,7 @@
 			return;
 		}
 
-		return redirect(302, "/tracking");
+		await goto("/tracking");
 	}
 </script>
 

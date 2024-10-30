@@ -1,10 +1,15 @@
 import { auth } from "$lib/firebase/firebase";
 import { onAuthStateChanged, type User } from "firebase/auth";
 
-let user = $state<User | null>(null);
+let userState = $state<User | null>(null);
 
-$effect(() => {
-	onAuthStateChanged(auth, (u) => user = u);
-})
+const user = {
+	get value() {
+		return userState;
+	},
+	listen() {
+		onAuthStateChanged(auth, (u) => userState = u);
+	}
+}
 
 export default user;

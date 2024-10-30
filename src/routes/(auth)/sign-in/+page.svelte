@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { getErrorMessage } from '$lib/authUtils';
 	import { signInUser } from '$lib/firebase/auth';
-	import { redirect } from '@sveltejs/kit';
 
 	let errorMessage = $state<string | null>(null);
 	let email = $state<string>("");
@@ -22,7 +22,7 @@
 			return;
 		}
 
-		return redirect(302, '/tracking');
+		await goto('/tracking');
 	};
 </script>
 
