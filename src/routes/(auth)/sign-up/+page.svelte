@@ -1,30 +1,34 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import { getErrorMessage } from '$lib/authUtils';
 	import { signUpUser } from '$lib/firebase/auth';
-	import type { SubmitFunction } from '@sveltejs/kit';
+	import { redirect } from '@sveltejs/kit';
 
 	let errorMessage = $state<string | null>(null);
+	
+	let email = $state<string>("");
+	let username = $state<string>("");
+	let password = $state<string>("");
 
-	const onSubmit = (async ({ formData, cancel }) => {
-		const email = formData.get('email') as string | null;
-		const username = formData.get('username') as string | null;
-		const password = formData.get('password') as string | null;
+	const onSubmit = async (e: SubmitEvent) => {
+		e.preventDefault();
 
 		if (!email || !username || !password) {
 			errorMessage = 'Empty field(s)';
-			cancel();
 			return;
 		}
 
 		try {
 			await signUpUser(email, username, password);
-		} catch (e) {
-			console.log(e);
+		} catch (e: unknown) {
+			errorMessage = getErrorMessage(e as Error);
+			return;
 		}
-	}) as SubmitFunction;
+
+		return redirect(302, "/tracking");
+	}
 </script>
 
-<form method="POST" use:enhance={onSubmit}>
+<form method="POST" onsubmit={onSubmit}>
 	<div class="form-control">
 		<label for="email">Email</label>
 		<input
@@ -33,6 +37,7 @@
 			id="email"
 			autocomplete="email"
 			placeholder="Email"
+			bind:value={email}
 		/>
 	</div>
 	<div class="form-control">
@@ -41,8 +46,9 @@
 			type="text"
 			name="username"
 			id="username"
-			autocomplete="username"
+			autocomplete="off"
 			placeholder="Username"
+			bind:value={username}
 		/>
 	</div>
 	<div class="form-control">
@@ -53,9 +59,10 @@
 			id="password"
 			autocomplete="current-password"
 			placeholder="Password"
+			bind:value={password}
 		/>
 	</div>
-	<button type="submit"> Submit </button>
+	<button type="submit">Submit</button>
 	{#if errorMessage}
 		<p class="error-message">{errorMessage}</p>
 	{/if}

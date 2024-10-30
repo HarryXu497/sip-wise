@@ -1,31 +1,32 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import { getErrorMessage } from '$lib/authUtils';
 	import { signInUser } from '$lib/firebase/auth';
-	import { redirect, type SubmitFunction } from '@sveltejs/kit';
+	import { redirect } from '@sveltejs/kit';
 
 	let errorMessage = $state<string | null>(null);
+	let email = $state<string>("");
+	let password = $state<string>("");
 
-	const onSubmit = (async ({ formData, cancel }) => {
-		const email = formData.get('email') as string | null;
-		const password = formData.get('password') as string | null;
+	const onSubmit = async (e: SubmitEvent) => {
+		e.preventDefault();
 
 		if (!email || !password) {
 			errorMessage = 'Empty field(s)';
-			cancel();
 			return;
 		}
 
 		try {
 			await signInUser(email, password);
-		} catch (e) {
-			console.log(e);
+		} catch (e: unknown) {
+			errorMessage = getErrorMessage(e as Error);
+			return;
 		}
 
 		return redirect(302, '/tracking');
-	}) as SubmitFunction;
+	};
 </script>
 
-<form method="POST" use:enhance={onSubmit}>
+<form method="POST" onsubmit={onSubmit}>
 	<div class="form-control">
 		<label for="email">Email</label>
 		<input
@@ -34,6 +35,7 @@
 			id="email"
 			autocomplete="email"
 			placeholder="Email"
+			bind:value={email}
 		/>
 	</div>
 	<div class="form-control">
@@ -44,9 +46,10 @@
 			id="password"
 			autocomplete="current-password"
 			placeholder="Password"
+			bind:value={password}
 		/>
 	</div>
-	<button type="submit"> Submit </button>
+	<button type="submit">Submit</button>
 	{#if errorMessage}
 		<p class="error-message">{errorMessage}</p>
 	{/if}
