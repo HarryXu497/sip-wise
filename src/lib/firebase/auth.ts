@@ -4,7 +4,7 @@ import { auth } from "./firebase";
 export async function signUpUser(email: string, username: string, password: string) {
 	const credentials = await createUserWithEmailAndPassword(auth, email, password);
 
-	updateProfile(credentials.user, {
+	await updateProfile(credentials.user, {
 		displayName: username,
 	})
 }

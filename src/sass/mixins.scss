@@ -1,0 +1,54 @@
+@mixin button {
+	background-color: var(--color-primary);
+
+	font-family: "Jetbrains Mono", sans-serif;
+	color: var(--color-light);
+	border-width: 4px;
+	border-style: solid;
+
+	transition: all 100ms ease-in;
+
+	border-top-color: var(--color-primary-100);
+	border-left-color: var(--color-primary-100);
+	border-bottom-color: var(--color-primary-800);
+	border-right-color: var(--color-primary-800);
+
+
+	padding: 0.75rem 1rem;
+	
+	&:hover {
+		cursor: pointer;
+
+		border-top-color: var(--color-primary-800);
+		border-left-color: var(--color-primary-800);
+		border-bottom-color: var(--color-primary-100);
+		border-right-color: var(--color-primary-100);
+	}
+}
+
+@mixin auth-form {
+	main {
+		width: clamp(28rem, 30%, 36rem);
+		margin: 3rem auto;
+	}
+
+	form {
+		min-height: 24rem;
+	}
+
+	.form-control {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+
+		input {
+			width: 60%;
+		}
+	}
+
+	.header-text {
+		display: inline-block;
+		color: var(--color-light);
+		padding: 0.25rem;
+	}
+}

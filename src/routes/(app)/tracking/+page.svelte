@@ -19,7 +19,7 @@
 </script>
 
 <main>
-	<h1>Hello, {user.value}</h1>
+	<h1>Hello, {user.value?.displayName}</h1>
 
 </main>
 

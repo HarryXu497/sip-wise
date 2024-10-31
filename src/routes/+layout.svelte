@@ -1,4 +1,5 @@
 <script lang="ts">
+	import "../app.scss"
 	import Navbar from "$lib/components/Navbar.svelte";
 	import user from "$lib/state/auth.svelte";
 	import type { Snippet } from "svelte";
