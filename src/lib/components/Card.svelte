@@ -45,15 +45,18 @@
 	}
 
 	.header {
-		min-height: 1.5rem;
+		min-height: 2rem;
 		display: flex;
 		flex-direction: row;
 		justify-content: start;
 		align-items: center;;
 		width: 100%;
 		background-color: var(--color-primary);
+		box-sizing: border-box;
 
 		border-top: 5px var(--color-card-header-outer) solid;
 		border-left: 5px var(--color-card-header-outer) solid;
+		border-bottom: 5px var(--color-card-header-inner) solid;
+		border-right: 5px var(--color-card-header-inner) solid;
 	}
 </style>

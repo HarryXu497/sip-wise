@@ -30,7 +30,7 @@
 <main>
 	<Card>
 		{#snippet header()}
-			<p class="header-text">Cheese.txt</p>
+			<p class="header-text">sign_in.exe</p>
 		{/snippet}
 		<form method="POST" onsubmit={onSubmit}>
 			<div class="form-control">
@@ -55,7 +55,7 @@
 					bind:value={password}
 				/>
 			</div>
-			<button type="submit">Submit</button>
+			<button type="submit" class="submit">Submit</button>
 			{#if errorMessage}
 				<p class="error-message">{errorMessage}</p>
 			{/if}

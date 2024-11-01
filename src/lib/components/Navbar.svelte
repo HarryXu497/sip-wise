@@ -111,4 +111,35 @@
 		font-family: "Jetbrains Mono", monospace;
 		cursor: pointer;
 	}
+
+	@include exports.media-small {
+		nav {
+			padding: 2rem;
+			flex-direction: column;
+			gap: 1.5rem;
+		}
+
+		.logo a {
+			font-size: 3rem;
+		}
+
+		.links a, button {
+			font-size: 1.125rem;
+			padding: 0.5rem 0.75rem;
+		}
+	}
+
+	@include exports.media-smallest {
+		nav {
+			gap: 1rem;
+		}
+
+		.logo a {
+			font-size: 2rem;
+		}
+
+		.links a, button {
+			font-size: 1rem;
+		}
+	}
 </style>

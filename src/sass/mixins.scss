@@ -13,7 +13,6 @@
 	border-bottom-color: var(--color-primary-800);
 	border-right-color: var(--color-primary-800);
 
-
 	padding: 0.75rem 1rem;
 	
 	&:hover {
@@ -28,27 +27,49 @@
 
 @mixin auth-form {
 	main {
+		--title-font-size: 1.5rem;
+		--label-font-size: 1.5rem;
+		--input-font-size: 1.25rem;
+
 		width: clamp(28rem, 30%, 36rem);
-		margin: 3rem auto;
+		margin: 0 auto;
+		margin-top: 4rem;
 	}
 
 	form {
-		min-height: 24rem;
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
 	}
 
 	.form-control {
 		display: flex;
-		flex-direction: row;
-		justify-content: space-between;
+		flex-direction: column;
+		gap: 0.5rem;
 
 		input {
-			width: 60%;
+			all: unset;
+
+			font-size: var(--input-font-size);
+			color: var(--color-dark-400);
+			border-bottom: 3px solid var(--color-dark-300);
+		}
+
+		label {
+			font-size: var(--label-font-size);
 		}
 	}
 
 	.header-text {
 		display: inline-block;
 		color: var(--color-light);
-		padding: 0.25rem;
+		padding: 0.5rem;
+		font-size: 1.5rem;
+	}
+
+	.submit {
+		@include button();
+
+		font-size: 1rem;
 	}
 }
