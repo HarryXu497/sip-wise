@@ -1,7 +1,14 @@
 <script lang="ts">
 	import Card from '$lib/components/Card.svelte';
-	import type { DrinkCount } from '$lib/models/DrinkCount.model';
+	import { firestore } from '$lib/firebase/firebase';
+	import type { DrinkType, DrinkCount } from '$lib/models/DrinkCount.model';
 	import user from '$lib/state/auth.svelte';
+	import { collection, addDoc, serverTimestamp, onSnapshot, type DocumentData } from 'firebase/firestore';
+
+	interface DrinkTransaction {
+		type: DrinkType;
+		timestamp: Date;
+	}
 
 	let counts = $state<DrinkCount[]>([
 		{
@@ -17,6 +24,49 @@
 			count: 0
 		}
 	]);
+
+	$effect(() => {
+		if (!user.value) {
+			return;
+		}
+
+		// Add transaction data
+		const collectionRef = collection(firestore, "tracking", user.value?.uid, "drinks");
+
+		onSnapshot(collectionRef, (data) => {
+			if (data.empty) {
+				return;
+			}
+
+			const documents = data.docs;
+
+			const res = documents.map(doc => (
+				{
+					type: doc.get("type") as DrinkType,
+					timestamp: doc.get("timestamp") as Date,
+				} as DrinkTransaction
+			));
+
+			console.log(res);
+		})
+	})
+
+	for (const counter of counts) {
+		$effect(() => {
+			if (!user.value) {
+				return;
+			}
+
+			// Add transaction data
+			const collectionRef = collection(firestore, "tracking", user.value?.uid, "drinks");
+
+			addDoc(collectionRef, {
+				type: counter.type,
+				timestamp: serverTimestamp(),
+			});
+		});
+	}
+
 
 	const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' } satisfies Intl.DateTimeFormatOptions;
 </script>
