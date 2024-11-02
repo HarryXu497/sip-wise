@@ -1,15 +1,9 @@
 <script lang="ts">
 	import Card from '$lib/components/Card.svelte';
 	import { firestore } from '$lib/firebase/firebase';
-	import type { DrinkType, DrinkCount } from '$lib/models/DrinkCount.model';
-	import user from '$lib/state/auth.svelte';
-	import { collection, addDoc, serverTimestamp, setDoc, doc, onSnapshot } from 'firebase/firestore';
-
-	interface SnapshotData {
-		waterCount: number;
-		juiceCount: number;
-		popCount: number;
-	}
+	import type { DrinkCount } from '$lib/models/DrinkCount.model';
+	import user from '$lib/auth/user.svelte';
+	import { collection, addDoc, serverTimestamp,  query, getCountFromServer, where, Timestamp, getDocs } from 'firebase/firestore';
 
 	let doneLoading = $state(false);
 
@@ -34,18 +28,54 @@
 			return;
 		}
 
-		const docRef = doc(firestore, "tracking", user.value?.uid);
-
-		onSnapshot(docRef, (snapshot) => {
-			const data = snapshot.data() as SnapshotData;
-
-			counts[0].count = data.waterCount;
-			counts[1].count = data.juiceCount;
-			counts[2].count = data.popCount;
-
+		Promise.all(counts.map(setCountFromFirestore)).then(() => {
 			doneLoading = true;
 		})
 	})
+
+	async function setCountFromFirestore(counter: DrinkCount) {
+		if (!user.value?.uid) {
+			return;
+		}
+
+		const collectionRef = collection(firestore, "tracking", user.value.uid, "drinks");
+		const currentDate = new Date();
+
+		const q = query(
+			collectionRef, 
+			where(
+				"timestamp",
+				">=",
+				Timestamp.fromDate(
+					new Date(
+						currentDate.getFullYear(),
+						currentDate.getMonth(),
+						currentDate.getDate(),
+					),
+				),
+			),
+			where(
+				"timestamp",
+				"<",
+				Timestamp.fromDate(
+					new Date(
+						currentDate.getFullYear(),
+						currentDate.getMonth(),
+						currentDate.getDate() + 1,
+					),
+				),
+			),
+			where(
+				"type",
+				"==",
+				counter.type,
+			),
+		);
+
+		const serverCount = await getCountFromServer(q);
+
+		counter.count = serverCount.data().count;
+	}
 
 	async function onAddDrink(counter: DrinkCount) {
 		if (!user.value?.uid) {
@@ -53,24 +83,15 @@
 		}
 
 		counter.count++;
+		
+		const collectionRef = collection(firestore, "tracking", user.value.uid, "drinks");
 
-		// Update denormalized count fields
-		const docRef = doc(firestore, "tracking", user.value?.uid);
-		
-		const data = {} as Record<string, number>
-		
-		data[`${counter.type}Count`] = counter.count;
-		
-		const setDocPromise = setDoc(docRef, data, { merge: true });
-		
-		const collectionRef = collection(firestore, "tracking", user.value?.uid, "drinks");
-
-		const addDocPromise = addDoc(collectionRef, {
+		await addDoc(collectionRef, {
 			type: counter.type,
 			timestamp: serverTimestamp(),
 		});
 
-		await Promise.all([setDocPromise, addDocPromise]);
+		await setCountFromFirestore(counter);
 	}
 
 
@@ -83,7 +104,7 @@
 			<p class="header-text">tracking.exe</p>
 		{/snippet}
 		<div class="wrapper">
-			<h1>Hello, <span class="red-highlight">{user.value?.displayName}</span>.</h1>
+			<h1>Hello, <span><span class="red-highlight">{user.value?.displayName}</span>.</span></h1>
 
 			<div class="hr"></div>
 
@@ -104,23 +125,26 @@
 						</span>
 						<button onclick={() => onAddDrink(count)}>Add {count.type}</button>
 					</div>
-				{/each}
-			</section>
+					{/each}
+				</section>
 		</div>
 	</Card>
 </main>
 
 <style lang="scss">
 	@use '../../../sass/exports.scss' as exports;
+	
+	@include exports.header-text();
 
 	main {
 		--h1-font-size: 5rem;
 		--h2-font-size: 1.75rem;
 		--count-font-size: 8rem;
+		--button-font-size: 1.125rem;
 
-		width: clamp(32rem, 50%, 64rem);
+		width: clamp(36rem, 60%, 64rem);
 		margin: 0 auto;
-		margin-top: 2rem;
+		margin-top: 3rem;
 		display: flex;
 		flex-direction: column;
 		gap: 2rem;
@@ -128,12 +152,6 @@
 
 	.hr {
 		border-bottom: 2px solid var(--color-dark-100);
-	}
-
-	.header-text {
-		font-size: 1.5rem;
-		color: var(--color-light);
-		padding: 0.5rem;
 	}
 
 	h1 {
@@ -165,11 +183,7 @@
 	}
 
 	.beverage-container {
-		display: flex;
-		flex-direction: row;
 		gap: 1.5rem;
-
-		margin-top: 1rem;
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
 	}
@@ -188,8 +202,17 @@
 			@include exports.button();
 
 			width: 100%;
-			font-size: 1.125rem;
+			font-size: var(--button-font-size);
 			text-transform: capitalize;
+		}
+	}
+
+	@include exports.media-largest() {
+		main {
+			--h1-font-size: 4.5rem;
+			--h2-font-size: 1.5rem;
+			--count-font-size: 4rem;
+			--button-font-size: 1rem;
 		}
 	}
 
@@ -202,6 +225,23 @@
 	@include exports.media-small {
 		main {
 			width: clamp(16rem, 80%, 64rem);
+		}
+
+		.beverage-container {
+			grid-template-columns: repeat(1, 1fr);
+		}
+
+		main {
+			--h1-font-size: 4.5rem;
+			--h2-font-size: 1.5rem;
+			--count-font-size: 7rem;
+			--button-font-size: 1.5rem;
+		}
+	}
+
+	@include exports.media-smallest {
+		main {
+			margin-top: 0;;
 		}
 	}
 </style>

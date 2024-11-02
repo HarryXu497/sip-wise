@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { getErrorMessage } from '$lib/authUtils';
+	import { getErrorMessage } from '$lib/auth/utils';
 	import Card from '$lib/components/Card.svelte';
 	import { signInUser } from '$lib/firebase/auth';
 

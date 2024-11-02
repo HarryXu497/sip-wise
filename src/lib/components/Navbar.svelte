@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { signOutUser } from '$lib/firebase/auth';
-	import user from '$lib/state/auth.svelte';
+	import user from '$lib/auth/user.svelte';
 
 	let mousedownState = $state<boolean[]>(Array(4).fill(false));
 </script>
@@ -11,7 +11,7 @@
 			<li><a href="/"><span class="primary-highlight">SIP</span>.<span class="primary-highlight">WISE</span></a></li>
 		</ul>
 	</div>
-	<div class="links">
+	<div class="links" class:logged-in={user.value}>
 		<ul>
 			{#if user.value}
 				<li>
@@ -87,6 +87,14 @@
 	button,
 	a {
 		all: unset;
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+	}
+
+	button, a {
+		width: 100%;
 	}
 
 	li {
@@ -134,12 +142,17 @@
 			gap: 1rem;
 		}
 
-		.logo a {
-			font-size: 2rem;
-		}
-
 		.links a, button {
 			font-size: 1rem;
+		}
+
+		.links > ul {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+		}
+
+		.links.logged-in > ul li:last-of-type {
+			grid-column: 1 / -1;
 		}
 	}
 </style>

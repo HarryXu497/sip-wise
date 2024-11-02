@@ -1,7 +1,8 @@
 <script lang="ts">
+	import Card from "$lib/components/Card.svelte";
 	import { firestore } from "$lib/firebase/firebase";
 	import { DRINK_TYPES, type DrinkType } from "$lib/models/DrinkCount.model";
-	import user from "$lib/state/auth.svelte";
+	import user from "$lib/auth/user.svelte";
 	import { Chart } from "chart.js/auto";
 	import { Colors } from 'chart.js/auto';
 
@@ -23,6 +24,7 @@
 		"juice": 0,
 		"pop": 0,
 	});
+	let doneLoading = $state(false);
 
 	Chart.register(Colors);
 
@@ -87,6 +89,7 @@
 			{
 				type: "bar",
 				options: {
+					maintainAspectRatio: false,
 					responsive: true,
 					plugins: {
 						legend: {
@@ -142,6 +145,8 @@
 			return;
 		}
 
+		doneLoading = true;
+
 		chart.data.datasets[0].data = [
 			drinkCounts["water"],
 			drinkCounts["juice"],
@@ -156,31 +161,47 @@
 
 
 <main>
-	<canvas bind:this={barChart}>
-	
-	</canvas>
+	<Card>
+		{#snippet header()}
+			<p class="header-text">visualize.exe</p>
+		{/snippet}
+		<div class="container">
+			<canvas bind:this={barChart}>
+			
+			</canvas>
+		</div>
+	</Card>
 </main>
 
 <style lang="scss">
 	@use "../../../sass/exports.scss" as exports;
 
+	@include exports.header-text();
+
 	main {
 		margin: 0 auto;
 		width: clamp(32rem, 50%, 64rem);
-		display: flex;
-		flex-direction: row;
-		justify-content: center;
-		align-items: center;
-		margin-top: 4rem;
+		margin-top: 3rem;
+	}
+
+	.container {
+		min-height: 24rem;
 	}
 
 	canvas {
 		inset: 0;
+		height: 10rem;
 	}
 
 	@include exports.media-small {
 		main {
 			width: clamp(16rem, 80%, 64rem);
+		}
+	}
+
+	@include exports.media-smallest {
+		main {
+			margin-top: 0;
 		}
 	}
 </style>

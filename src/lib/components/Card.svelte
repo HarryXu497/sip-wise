@@ -49,7 +49,7 @@
 		display: flex;
 		flex-direction: row;
 		justify-content: start;
-		align-items: center;;
+		align-items: center;
 		width: 100%;
 		background-color: var(--color-primary);
 		box-sizing: border-box;
