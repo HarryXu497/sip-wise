@@ -3,12 +3,15 @@
 	import { firestore } from '$lib/firebase/firebase';
 	import type { DrinkType, DrinkCount } from '$lib/models/DrinkCount.model';
 	import user from '$lib/state/auth.svelte';
-	import { collection, addDoc, serverTimestamp, setDoc, doc } from 'firebase/firestore';
+	import { collection, addDoc, serverTimestamp, setDoc, doc, onSnapshot } from 'firebase/firestore';
 
-	interface DrinkTransaction {
-		type: DrinkType;
-		timestamp: Date;
+	interface SnapshotData {
+		waterCount: number;
+		juiceCount: number;
+		popCount: number;
 	}
+
+	let doneLoading = $state(false);
 
 	let counts = $state<DrinkCount[]>([
 		{
@@ -25,90 +28,51 @@
 		}
 	]);
 
-	// $effect(() => {
-	// 	// if (!user.value) {
-	// 	// 	return;
-	// 	// }
+	// Retrieve counts
+	$effect(() => {
+		if (!user.value) {
+			return;
+		}
 
-	// 	// const currentDate = new Date();
+		const docRef = doc(firestore, "tracking", user.value?.uid);
 
-	// 	// const collectionRef = collection(firestore, "tracking", user.value?.uid, "drinks");
+		onSnapshot(docRef, (snapshot) => {
+			const data = snapshot.data() as SnapshotData;
 
-	// 	// const baseQuery = query(
-	// 	// 	collectionRef, 
-	// 	// 	where(
-	// 	// 		"timestamp",
-	// 	// 		"==",
-	// 	// 		new Date(
-	// 	// 			currentDate.getFullYear(),
-	// 	// 			currentDate.getMonth(),
-	// 	// 			currentDate.getDate(),
-	// 	// 		)
-	// 	// 	)
-	// 	// )
+			counts[0].count = data.waterCount;
+			counts[1].count = data.juiceCount;
+			counts[2].count = data.popCount;
 
+			doneLoading = true;
+		})
+	})
 
-	// 	// const waterCount = query(
-	// 	// 	baseQuery, 
-	// 	// 	where("type", "==", "water")
-	// 	// );
+	async function onAddDrink(counter: DrinkCount) {
+		if (!user.value?.uid) {
+			return;
+		}
 
-	// 	// const juiceCount = query(
-	// 	// 	baseQuery, 
-	// 	// 	where("type", "==", "juice")
-	// 	// );
+		counter.count++;
 
-	// 	// const popCount = query(
-	// 	// 	baseQuery, 
-	// 	// 	where("type", "==", "pop")
-	// 	// );
+		// Update denormalized count fields
+		const docRef = doc(firestore, "tracking", user.value?.uid);
+		
+		const data = {} as Record<string, number>
+		
+		data[`${counter.type}Count`] = counter.count;
+		
+		const setDocPromise = setDoc(docRef, data, { merge: true });
+		
+		const collectionRef = collection(firestore, "tracking", user.value?.uid, "drinks");
 
-	// 	// onSnapshot(q, (data) => {
-	// 	// 	if (data.empty) {
-	// 	// 		return;
-	// 	// 	}
-
-	// 	// 	const documents = data.docs;
-
-	// 	// 	const res = documents.map(doc => (
-	// 	// 		{
-	// 	// 			type: doc.get("type") as DrinkType,
-	// 	// 			timestamp: doc.get("timestamp") as Date,
-	// 	// 		} as DrinkTransaction
-	// 	// 	));
-
-	// 	// 	console.log(res);
-	// 	// })
-	// })
-
-	for (const { count, type } of counts) {
-		$effect(() => {
-			if (!user.value) {
-				return;
-			}
-
-			// Trigger on count change
-			count;
-
-			// Add transaction data
-			const collectionRef = collection(firestore, "tracking", user.value?.uid, "drinks");
-
-			addDoc(collectionRef, {
-				type,
-				timestamp: serverTimestamp(),
-			});
+		const addDocPromise = addDoc(collectionRef, {
+			type: counter.type,
+			timestamp: serverTimestamp(),
 		});
 
-		$effect(() => {
-			const docRef = doc(firestore, "tracking", user.value?.uid);
-
-			const data = {} as Record<string, number>
-
-			data[`${type}Count`] = count;
-
-			setDoc(docRef, data, { merge: true });
-		})
+		await Promise.all([setDocPromise, addDocPromise]);
 	}
+
 
 	const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' } satisfies Intl.DateTimeFormatOptions;
 </script>
@@ -131,8 +95,14 @@
 			<section class="beverage-container">
 				{#each counts as count}
 					<div class="beverage-counter">
-						<span class="beverage-count">{count.count}</span>
-						<button onclick={() => count.count++}>Add {count.type}</button>
+						<span class="beverage-count" class:red-highlight={!doneLoading}>
+							{#if doneLoading}
+								{count.count}
+							{:else}
+								·
+							{/if}
+						</span>
+						<button onclick={() => onAddDrink(count)}>Add {count.type}</button>
 					</div>
 				{/each}
 			</section>
@@ -170,6 +140,7 @@
 		display: flex;
 		flex-direction: row;
 		flex-wrap: wrap;
+		gap: 0.5rem;
 
 		font-size: var(--h1-font-size);
 		padding-bottom: 0.5rem;
