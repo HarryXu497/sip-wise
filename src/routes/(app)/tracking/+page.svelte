@@ -3,7 +3,7 @@
 	import { firestore } from '$lib/firebase/firebase';
 	import type { DrinkType, DrinkCount } from '$lib/models/DrinkCount.model';
 	import user from '$lib/state/auth.svelte';
-	import { collection, addDoc, serverTimestamp, onSnapshot, type DocumentData } from 'firebase/firestore';
+	import { collection, addDoc, serverTimestamp, setDoc, doc } from 'firebase/firestore';
 
 	interface DrinkTransaction {
 		type: DrinkType;
@@ -25,48 +25,90 @@
 		}
 	]);
 
-	$effect(() => {
-		if (!user.value) {
-			return;
-		}
+	// $effect(() => {
+	// 	// if (!user.value) {
+	// 	// 	return;
+	// 	// }
 
-		// Add transaction data
-		const collectionRef = collection(firestore, "tracking", user.value?.uid, "drinks");
+	// 	// const currentDate = new Date();
 
-		onSnapshot(collectionRef, (data) => {
-			if (data.empty) {
-				return;
-			}
+	// 	// const collectionRef = collection(firestore, "tracking", user.value?.uid, "drinks");
 
-			const documents = data.docs;
+	// 	// const baseQuery = query(
+	// 	// 	collectionRef, 
+	// 	// 	where(
+	// 	// 		"timestamp",
+	// 	// 		"==",
+	// 	// 		new Date(
+	// 	// 			currentDate.getFullYear(),
+	// 	// 			currentDate.getMonth(),
+	// 	// 			currentDate.getDate(),
+	// 	// 		)
+	// 	// 	)
+	// 	// )
 
-			const res = documents.map(doc => (
-				{
-					type: doc.get("type") as DrinkType,
-					timestamp: doc.get("timestamp") as Date,
-				} as DrinkTransaction
-			));
 
-			console.log(res);
-		})
-	})
+	// 	// const waterCount = query(
+	// 	// 	baseQuery, 
+	// 	// 	where("type", "==", "water")
+	// 	// );
 
-	for (const counter of counts) {
+	// 	// const juiceCount = query(
+	// 	// 	baseQuery, 
+	// 	// 	where("type", "==", "juice")
+	// 	// );
+
+	// 	// const popCount = query(
+	// 	// 	baseQuery, 
+	// 	// 	where("type", "==", "pop")
+	// 	// );
+
+	// 	// onSnapshot(q, (data) => {
+	// 	// 	if (data.empty) {
+	// 	// 		return;
+	// 	// 	}
+
+	// 	// 	const documents = data.docs;
+
+	// 	// 	const res = documents.map(doc => (
+	// 	// 		{
+	// 	// 			type: doc.get("type") as DrinkType,
+	// 	// 			timestamp: doc.get("timestamp") as Date,
+	// 	// 		} as DrinkTransaction
+	// 	// 	));
+
+	// 	// 	console.log(res);
+	// 	// })
+	// })
+
+	for (const { count, type } of counts) {
 		$effect(() => {
 			if (!user.value) {
 				return;
 			}
 
+			// Trigger on count change
+			count;
+
 			// Add transaction data
 			const collectionRef = collection(firestore, "tracking", user.value?.uid, "drinks");
 
 			addDoc(collectionRef, {
-				type: counter.type,
+				type,
 				timestamp: serverTimestamp(),
 			});
 		});
-	}
 
+		$effect(() => {
+			const docRef = doc(firestore, "tracking", user.value?.uid);
+
+			const data = {} as Record<string, number>
+
+			data[`${type}Count`] = count;
+
+			setDoc(docRef, data, { merge: true });
+		})
+	}
 
 	const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' } satisfies Intl.DateTimeFormatOptions;
 </script>
@@ -81,7 +123,10 @@
 
 			<div class="hr"></div>
 
-			<h2>Your <span class="red-highlight">Sip Stats</span> for <span class="red-highlight">{new Date().toLocaleDateString('en-us', options)}</span>:</h2>
+			<h2>
+				Your <span class="red-highlight">Sip Stats</span> for
+				<span class="red-highlight">{new Date().toLocaleDateString('en-us', options)}</span>:
+			</h2>
 
 			<section class="beverage-container">
 				{#each counts as count}
@@ -125,7 +170,7 @@
 		display: flex;
 		flex-direction: row;
 		flex-wrap: wrap;
-		
+
 		font-size: var(--h1-font-size);
 		padding-bottom: 0.5rem;
 		font-family: 'Playfair Display', serif;
@@ -170,7 +215,7 @@
 	.beverage-counter {
 		button {
 			@include exports.button();
-			
+
 			width: 100%;
 			font-size: 1.125rem;
 			text-transform: capitalize;
@@ -182,11 +227,10 @@
 			margin-top: 0;
 		}
 	}
-	
+
 	@include exports.media-small {
 		main {
 			width: clamp(16rem, 80%, 64rem);
 		}
 	}
-	
 </style>
