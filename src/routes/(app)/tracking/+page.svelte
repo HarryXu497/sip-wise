@@ -125,8 +125,8 @@
 						</span>
 						<button onclick={() => onAddDrink(count)}>Add {count.type}</button>
 					</div>
-					{/each}
-				</section>
+				{/each}
+			</section>
 		</div>
 	</Card>
 </main>
@@ -143,8 +143,7 @@
 		--button-font-size: 1.125rem;
 
 		width: clamp(36rem, 60%, 64rem);
-		margin: 0 auto;
-		margin-top: 3rem;
+		margin: 3rem auto;
 		display: flex;
 		flex-direction: column;
 		gap: 2rem;

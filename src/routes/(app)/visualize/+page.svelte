@@ -179,9 +179,8 @@
 	@include exports.header-text();
 
 	main {
-		margin: 0 auto;
+		margin: 3rem auto;
 		width: clamp(32rem, 50%, 64rem);
-		margin-top: 3rem;
 	}
 
 	.container {

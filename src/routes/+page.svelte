@@ -241,8 +241,12 @@
 	}
 
 	@include exports.media-max(832px) {
+		.hero {
+			display: flex;
+			flex-direction: column;
+		}
 		.model {
-			margin-left: 0;
+			margin-left: -6rem;
 			grid-column: 1 / -1;
 			grid-row: 1 / -1;
 		}
