@@ -19,6 +19,7 @@
 		
 		const camera = new THREE.PerspectiveCamera(50, sceneElement.clientWidth / sceneElement.clientHeight, 10, 1000);
 		
+		
 		const renderer = new THREE.WebGLRenderer();
 		renderer.shadowMap.enabled = true;
 		renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
@@ -45,13 +46,25 @@
 		outlinePass.selectedObjects = [gltf.scene];
 		outlinePass.edgeThickness = 2;
 		outlinePass.edgeGlow = 2;
-		outlinePass.visibleEdgeColor = new THREE.Color().setHex(0x111111);
+		outlinePass.visibleEdgeColor = new THREE.Color().setHex(0x333333);
 		composer.addPass( outlinePass );
 		
 		const outputPass = new OutputPass();
 		composer.addPass( outputPass );
 		
 		composer.render();
+
+		window.addEventListener( 'resize', onWindowResize, false );
+	
+		function onWindowResize(){
+	
+			camera.aspect = sceneElement!.clientWidth / sceneElement!.clientHeight;
+			camera.updateProjectionMatrix();
+	
+			renderer.setSize( sceneElement!.clientWidth, sceneElement!.clientHeight );
+	
+			composer.render();
+		}
 	}
 
 	$effect(() => {
@@ -59,17 +72,18 @@
 			return;
 		}
 
-
-
 		const scene = new THREE.Scene();
 		scene.background = new THREE.Color().setHex(0xf2f2f2);
 
-		const directionalLight1 = new THREE.DirectionalLight(0xffffff, 2);
+		const directionalLight1 = new THREE.DirectionalLight(0xffffff, 4);
 		directionalLight1.position.set(-12, -29, 100);
 		scene.add(directionalLight1);
 
-		const ambientLight = new THREE.AmbientLight(0xffffff, 2);
-		scene.add(ambientLight);
+		const ambientLight1 = new THREE.AmbientLight(0xffffff, 2);
+		scene.add(ambientLight1);
+
+		const ambientLight2 = new THREE.AmbientLight(0xff0000, 8);
+		scene.add(ambientLight2);
 		
 		const loader = new GLTFLoader();
 		
@@ -86,10 +100,8 @@
 			scene.add(gltf.scene);
 
 			initWithModel(gltf, scene);
-		}, undefined, function ( error ) {
-			
-			console.error( error );
-		} );
+		});
+		
 	
 	})
 		
@@ -112,6 +124,10 @@
 	@use "../sass/exports.scss" as exports;
 
 	.hero {
+		--title-font-size: 8rem;
+		--subtitle-font-size: 1.25rem;
+		--button-font-size: 1.5rem;
+
 		height: calc(100lvh - 2rem);
 		display: grid;
 		grid-template-columns: repeat(12, 1fr);
@@ -133,11 +149,11 @@
 	}
 
 	h1.title {
-		font-size: 8rem;
+		font-size: var(--title-font-size);
 	}
 
 	p.subtitle {
-		font-size: 1.25rem;
+		font-size: var(--subtitle-font-size);
 		color: var(--color-dark-400);
 		line-height: 1.5;
 	}
@@ -148,10 +164,18 @@
 		@include exports.button();
 
 		width: fit-content;
-		font-size: 1.5rem;
+		font-size: var(--button-font-size);
 	}
 
 	.red-highlight {
 		color: var(--color-primary);
+	}
+
+	@include exports.media-max(1364px) {
+		.hero {
+			--title-font-size: 7rem;
+			--subtitle-font-size: 1.125rem;
+			--button-font-size: 1.25rem;
+		}
 	}
 </style>
