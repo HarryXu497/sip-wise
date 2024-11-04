@@ -6,11 +6,11 @@ interface AuthRoute {
 const AUTHORIZED_ROUTES: AuthRoute[] = [
 	{
 		pathname: "/visualize",
-		redirectTo: "/"
+		redirectTo: "/sign-in"
 	},
 	{
 		pathname: "/tracking",
-		redirectTo: "/"
+		redirectTo: "/sign-in"
 	}
 ]
 
