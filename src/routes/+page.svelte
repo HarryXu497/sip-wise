@@ -257,7 +257,8 @@
 			--title-font-size: 3.5rem;
 		}
 		.text {
-			margin-top: 1rem;
+			margin: 2rem;
+			margin-top: 0.5rem;
 		}
 	}
 </style>

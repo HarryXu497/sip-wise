@@ -1,3 +1,5 @@
+@use "./media.scss" as media;
+
 @mixin button {
 	background-color: var(--color-primary);
 
@@ -78,5 +80,15 @@
 		@include button();
 
 		font-size: 1rem;
+	}
+
+	@include media.media-small {
+		main {
+			--title-font-size: 1.125rem;
+			--label-font-size: 1.125rem;
+			--input-font-size: 1rem;
+
+			width: clamp(16rem, 80%, 64rem);
+		}
 	}
 }
