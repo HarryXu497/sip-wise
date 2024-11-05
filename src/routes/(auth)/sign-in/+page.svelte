@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import { getErrorMessage } from '$lib/auth/utils';
 	import Card from '$lib/components/Card.svelte';
 	import { signInUser } from '$lib/firebase/auth';
@@ -23,7 +24,7 @@
 			return;
 		}
 
-		await goto('/tracking');
+		await goto(`${base}/tracking`);
 	};
 </script>
 

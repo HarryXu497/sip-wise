@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import { getErrorMessage } from '$lib/auth/utils';
 	import Card from '$lib/components/Card.svelte';
 	import { signUpUser } from '$lib/firebase/auth';
-	import { redirect } from '@sveltejs/kit';
 
 	let errorMessage = $state<string | null>(null);
 
@@ -26,7 +26,7 @@
 			return;
 		}
 
-		await goto('/tracking');
+		await goto(`${base}/tracking`);
 	};
 </script>
 
