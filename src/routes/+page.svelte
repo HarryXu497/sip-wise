@@ -7,33 +7,52 @@
 	import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 	import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
 	import { FXAAShader } from 'three/addons/shaders/FXAAShader.js';
-	import type { GLTF } from 'three/examples/jsm/Addons.js';
 	import { onMount } from 'svelte';
 
 
 	let sceneElement = $state<HTMLElement>();
 
-	function initWithModel(gltf: GLTF, scene: THREE.Scene) {
+	onMount(async () => {
 		if (!sceneElement) {
 			return;
 		}
+
+		const scene = new THREE.Scene();
+		scene.background = new THREE.Color().setHex(0xf2f2f2);
+
+		const directionalLight1 = new THREE.DirectionalLight(0xffffff, 4);
+		directionalLight1.position.set(-12, -29, 100);
+		scene.add(directionalLight1);
+
+		const ambientLight1 = new THREE.AmbientLight(0xffffff, 2);
+		scene.add(ambientLight1);
+
+		const ambientLight2 = new THREE.AmbientLight(0xff0000, 8);
+		scene.add(ambientLight2);
 		
+		const loader = new GLTFLoader();
+		
+		const gltf = await loader.loadAsync("models/vending_machine/scene.gltf");
+
+		gltf.scene.scale.set(0.04, 0.04, 0.04);
+		// gltf.scene.rotation.x = 0.75;
+		gltf.scene.rotation.y = Math.PI * -0.5;
+		
+		gltf.scene.position.x = -12;
+		gltf.scene.position.y = -29;
+		gltf.scene.castShadow = true;
+		gltf.scene.visible = true;
+		
+		scene.add(gltf.scene);
+
 		const camera = new THREE.PerspectiveCamera(50, sceneElement.clientWidth / sceneElement.clientHeight, 10, 1000);
-		
 		
 		const renderer = new THREE.WebGLRenderer();
 		renderer.shadowMap.enabled = true;
 		renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 		renderer.setSize(sceneElement.clientWidth, sceneElement.clientHeight);
 		sceneElement.appendChild(renderer.domElement);
-		
-		// const planeGeometry = new THREE.PlaneGeometry(200, 200, 32, 32);
-		// const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf2f2f2 })
-		// const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-		// plane.receiveShadow = true;
-		// scene.add(plane);
 	
-		
 		camera.position.y = -19;
 		camera.position.z = 60;
 		
@@ -74,43 +93,6 @@
 	
 			composer.render();
 		}
-	}
-
-	onMount(async () => {
-		if (!sceneElement) {
-			return;
-		}
-
-		const scene = new THREE.Scene();
-		scene.background = new THREE.Color().setHex(0xf2f2f2);
-
-		const directionalLight1 = new THREE.DirectionalLight(0xffffff, 4);
-		directionalLight1.position.set(-12, -29, 100);
-		scene.add(directionalLight1);
-
-		const ambientLight1 = new THREE.AmbientLight(0xffffff, 2);
-		scene.add(ambientLight1);
-
-		const ambientLight2 = new THREE.AmbientLight(0xff0000, 8);
-		scene.add(ambientLight2);
-		
-		const loader = new GLTFLoader();
-		
-		const gltf = await loader.loadAsync("models/vending_machine/scene.gltf");
-
-		gltf.scene.scale.set(0.04, 0.04, 0.04);
-		// gltf.scene.rotation.x = 0.75;
-		gltf.scene.rotation.y = Math.PI * -0.5;
-		
-		gltf.scene.position.x = -12;
-		gltf.scene.position.y = -29;
-		gltf.scene.castShadow = true;
-		gltf.scene.visible = true;
-		
-		scene.add(gltf.scene);
-
-		initWithModel(gltf, scene);
-		
 	})
 		
 	</script>
@@ -122,7 +104,7 @@
 		</div>
 		<div class="text">
 			<h1 class="title"><span class="red-highlight">SIP</span>.<span class="red-highlight">WISE</span></h1>
-			<p class="subtitle">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Error est facilis officia pariatur dolorum magnam aliquam deserunt!</p>
+			<p class="subtitle">Track and visualize your drink sigmas!</p>
 			<a href="/sign-up" class="get-started">Get Started</a>
 		</div>
 	</section>
@@ -211,7 +193,7 @@
 		}
 	}
 
-	@include exports.media-largest() {
+	@include exports.media-largest {
 		.hero {
 			--title-font-size: 6rem;
 			--subtitle-font-size: 1rem;
@@ -243,12 +225,31 @@
 	@include exports.media-max(832px) {
 		.hero {
 			display: flex;
-			flex-direction: column;
+			flex-direction: column-reverse;
+			height: auto;
+		}
+		.text {
+			margin: 4rem;
+			margin-top: 2rem;
+			margin-bottom: 0;
 		}
 		.model {
-			margin-left: -6rem;
-			grid-column: 1 / -1;
-			grid-row: 1 / -1;
+			display: none;
+		}
+	}
+
+	@include exports.media-small {
+		.hero {
+			--title-font-size: 5rem;
+		}
+	}
+
+	@include exports.media-smallest {
+		.hero {
+			--title-font-size: 3.5rem;
+		}
+		.text {
+			margin-top: 1rem;
 		}
 	}
 </style>
