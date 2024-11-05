@@ -1,6 +1,6 @@
-const DRINK_TYPES = ["water", "juice", "pop"] as const;
+const DRINK_TYPES = ['water', 'juice', 'pop'] as const;
 
-type DrinkType = typeof DRINK_TYPES[number]; 
+type DrinkType = (typeof DRINK_TYPES)[number];
 
 interface DrinkCount {
 	type: DrinkType;

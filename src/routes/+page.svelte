@@ -8,7 +8,7 @@
 	import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
 	import { FXAAShader } from 'three/addons/shaders/FXAAShader.js';
 	import { onMount } from 'svelte';
-
+	import { base } from '$app/paths';
 
 	let sceneElement = $state<HTMLElement>();
 
@@ -29,39 +29,48 @@
 
 		const ambientLight2 = new THREE.AmbientLight(0xff0000, 8);
 		scene.add(ambientLight2);
-		
+
 		const loader = new GLTFLoader();
-		
-		const gltf = await loader.loadAsync("models/vending_machine/scene.gltf");
+
+		const gltf = await loader.loadAsync('models/vending_machine/scene.gltf');
 
 		gltf.scene.scale.set(0.04, 0.04, 0.04);
 		// gltf.scene.rotation.x = 0.75;
 		gltf.scene.rotation.y = Math.PI * -0.5;
-		
+
 		gltf.scene.position.x = -12;
 		gltf.scene.position.y = -29;
 		gltf.scene.castShadow = true;
 		gltf.scene.visible = true;
-		
+
 		scene.add(gltf.scene);
 
-		const camera = new THREE.PerspectiveCamera(50, sceneElement.clientWidth / sceneElement.clientHeight, 10, 1000);
-		
+		const camera = new THREE.PerspectiveCamera(
+			50,
+			sceneElement.clientWidth / sceneElement.clientHeight,
+			10,
+			1000
+		);
+
 		const renderer = new THREE.WebGLRenderer();
 		renderer.shadowMap.enabled = true;
 		renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 		renderer.setSize(sceneElement.clientWidth, sceneElement.clientHeight);
 		sceneElement.appendChild(renderer.domElement);
-	
+
 		camera.position.y = -19;
 		camera.position.z = 60;
-		
+
 		const composer = new EffectComposer(renderer);
-		
+
 		const renderPass = new RenderPass(scene, camera);
 		composer.addPass(renderPass);
-		
-		const outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
+
+		const outlinePass = new OutlinePass(
+			new THREE.Vector2(window.innerWidth, window.innerHeight),
+			scene,
+			camera
+		);
 		outlinePass.overlayMaterial.blending = THREE.CustomBlending;
 		outlinePass.selectedObjects = [gltf.scene];
 		outlinePass.edgeThickness = 2;
@@ -71,47 +80,46 @@
 		composer.addPass(outlinePass);
 
 		const effectFXAA = new ShaderPass(FXAAShader);
-		effectFXAA.uniforms["resolution"].value.set(
+		effectFXAA.uniforms['resolution'].value.set(
 			1 / sceneElement.clientWidth,
-			1 / sceneElement.clientHeight,
+			1 / sceneElement.clientHeight
 		);
 		effectFXAA.renderToScreen = true;
 		composer.addPass(effectFXAA);
-		
+
 		const outputPass = new OutputPass();
 		composer.addPass(outputPass);
-		
+
 		composer.render();
 
 		window.addEventListener('resize', onWindowResize, false);
-	
+
 		function onWindowResize() {
 			camera.aspect = sceneElement!.clientWidth / sceneElement!.clientHeight;
 			camera.updateProjectionMatrix();
-	
+
 			renderer.setSize(sceneElement!.clientWidth, sceneElement!.clientHeight);
-	
+
 			composer.render();
 		}
-	})
-		
-	</script>
+	});
+</script>
 
 <main>
 	<section class="hero">
-		<div class="model" bind:this={sceneElement}>
-
-		</div>
+		<div class="model" bind:this={sceneElement}></div>
 		<div class="text">
-			<h1 class="title"><span class="red-highlight">SIP</span>.<span class="red-highlight">WISE</span></h1>
+			<h1 class="title">
+				<span class="red-highlight">SIP</span>.<span class="red-highlight">WISE</span>
+			</h1>
 			<p class="subtitle">Track and visualize your drink sigmas!</p>
-			<a href="/sign-up" class="get-started">Get Started</a>
+			<a href="{base}/sign-up" class="get-started">Get Started</a>
 		</div>
 	</section>
 </main>
 
 <style lang="scss">
-	@use "../sass/exports.scss" as exports;
+	@use '../sass/exports.scss' as exports;
 
 	.hero {
 		--title-font-size: 8rem;
@@ -150,7 +158,7 @@
 
 	.get-started {
 		all: unset;
-		
+
 		@include exports.button();
 
 		width: fit-content;
@@ -215,7 +223,7 @@
 			grid-column: 2 / 8;
 			grid-row: 3 / 5;
 		}
-		
+
 		.model {
 			margin-left: 3rem;
 			grid-column: 5 / -1;

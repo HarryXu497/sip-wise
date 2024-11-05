@@ -3,7 +3,15 @@
 	import { firestore } from '$lib/firebase/firebase';
 	import type { DrinkCount } from '$lib/models/DrinkCount.model';
 	import user from '$lib/auth/user.svelte';
-	import { collection, addDoc, serverTimestamp,  query, getCountFromServer, where, Timestamp, getDocs } from 'firebase/firestore';
+	import {
+		collection,
+		addDoc,
+		serverTimestamp,
+		query,
+		getCountFromServer,
+		where,
+		Timestamp
+	} from 'firebase/firestore';
 
 	let doneLoading = $state(false);
 
@@ -30,46 +38,34 @@
 
 		Promise.all(counts.map(setCountFromFirestore)).then(() => {
 			doneLoading = true;
-		})
-	})
+		});
+	});
 
 	async function setCountFromFirestore(counter: DrinkCount) {
 		if (!user.value?.uid) {
 			return;
 		}
 
-		const collectionRef = collection(firestore, "tracking", user.value.uid, "drinks");
+		const collectionRef = collection(firestore, 'tracking', user.value.uid, 'drinks');
 		const currentDate = new Date();
 
 		const q = query(
-			collectionRef, 
+			collectionRef,
 			where(
-				"timestamp",
-				">=",
+				'timestamp',
+				'>=',
 				Timestamp.fromDate(
-					new Date(
-						currentDate.getFullYear(),
-						currentDate.getMonth(),
-						currentDate.getDate(),
-					),
-				),
+					new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())
+				)
 			),
 			where(
-				"timestamp",
-				"<",
+				'timestamp',
+				'<',
 				Timestamp.fromDate(
-					new Date(
-						currentDate.getFullYear(),
-						currentDate.getMonth(),
-						currentDate.getDate() + 1,
-					),
-				),
+					new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1)
+				)
 			),
-			where(
-				"type",
-				"==",
-				counter.type,
-			),
+			where('type', '==', counter.type)
 		);
 
 		const serverCount = await getCountFromServer(q);
@@ -83,19 +79,23 @@
 		}
 
 		counter.count++;
-		
-		const collectionRef = collection(firestore, "tracking", user.value.uid, "drinks");
+
+		const collectionRef = collection(firestore, 'tracking', user.value.uid, 'drinks');
 
 		await addDoc(collectionRef, {
 			type: counter.type,
-			timestamp: serverTimestamp(),
+			timestamp: serverTimestamp()
 		});
 
 		await setCountFromFirestore(counter);
 	}
 
-
-	const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' } satisfies Intl.DateTimeFormatOptions;
+	const options = {
+		weekday: 'long',
+		year: 'numeric',
+		month: 'short',
+		day: 'numeric'
+	} satisfies Intl.DateTimeFormatOptions;
 </script>
 
 <main>
@@ -133,7 +133,7 @@
 
 <style lang="scss">
 	@use '../../../sass/exports.scss' as exports;
-	
+
 	@include exports.header-text();
 
 	main {
@@ -240,7 +240,7 @@
 
 	@include exports.media-smallest {
 		main {
-			margin-top: 0;;
+			margin-top: 0;
 		}
 	}
 </style>

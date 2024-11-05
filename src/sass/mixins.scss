@@ -1,7 +1,7 @@
 @mixin button {
 	background-color: var(--color-primary);
 
-	font-family: "Jetbrains Mono", sans-serif;
+	font-family: 'Jetbrains Mono', sans-serif;
 	color: var(--color-light);
 	border-width: 4px;
 	border-style: solid;
@@ -14,7 +14,7 @@
 	border-right-color: var(--color-primary-800);
 
 	padding: 0.75rem 1rem;
-	
+
 	&:hover {
 		cursor: pointer;
 
@@ -73,7 +73,6 @@
 	.header-text {
 		display: inline-block;
 	}
-	
 
 	.submit {
 		@include button();

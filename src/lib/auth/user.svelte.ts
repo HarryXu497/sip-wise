@@ -1,5 +1,5 @@
-import { auth } from "$lib/firebase/firebase";
-import { onAuthStateChanged, type Unsubscribe, type User } from "firebase/auth";
+import { auth } from '$lib/firebase/firebase';
+import { onAuthStateChanged, type Unsubscribe, type User } from 'firebase/auth';
 
 let userState = $state<User | null>(null);
 let loaded = $state(false);
@@ -14,9 +14,9 @@ const user = {
 	listen(): Unsubscribe {
 		return onAuthStateChanged(auth, (u) => {
 			loaded = true;
-			userState = u
+			userState = u;
 		});
 	}
-}
+};
 
 export default user;

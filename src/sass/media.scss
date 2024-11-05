@@ -1,4 +1,4 @@
-@use "./breakpoints" as breakpoints;
+@use './breakpoints' as breakpoints;
 
 // Responsive styles
 @mixin media($start, $end) {
@@ -23,34 +23,34 @@
 	@include media-max(breakpoints.$breakpoint-smallest) {
 		@content;
 	}
-};
+}
 
 @mixin media-small {
 	@include media-max(breakpoints.$breakpoint-small) {
 		@content;
 	}
-};
+}
 
 @mixin media-medium {
 	@include media-max(breakpoints.$breakpoint-medium) {
 		@content;
 	}
-};
+}
 
 @mixin media-large {
 	@include media-max(breakpoints.$breakpoint-large) {
 		@content;
 	}
-};
+}
 
 @mixin media-larger {
 	@include media-max(breakpoints.$breakpoint-larger) {
 		@content;
 	}
-};
+}
 
 @mixin media-largest {
 	@include media-max(breakpoints.$breakpoint-largest) {
 		@content;
 	}
-};
+}

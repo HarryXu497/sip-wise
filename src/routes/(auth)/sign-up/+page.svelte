@@ -6,10 +6,10 @@
 	import { redirect } from '@sveltejs/kit';
 
 	let errorMessage = $state<string | null>(null);
-	
-	let email = $state<string>("");
-	let username = $state<string>("");
-	let password = $state<string>("");
+
+	let email = $state<string>('');
+	let username = $state<string>('');
+	let password = $state<string>('');
 
 	const onSubmit = async (e: SubmitEvent) => {
 		e.preventDefault();
@@ -26,9 +26,8 @@
 			return;
 		}
 
-		await goto("/tracking");
-	}
-
+		await goto('/tracking');
+	};
 </script>
 
 <main>
@@ -79,7 +78,7 @@
 </main>
 
 <style lang="scss">
-	@use "../../../sass/exports" as exports;
+	@use '../../../sass/exports' as exports;
 
 	@include exports.auth-form;
 </style>
