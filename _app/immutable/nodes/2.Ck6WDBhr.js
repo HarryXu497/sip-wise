@@ -1,4 +1,4 @@
-import{a as Nc,t as Fc}from"../chunks/disclose-version.DSYjmPSD.js";import{O as Oc,R as Bc,g as Pt,s as zc,T as tr,W as io,V as nr,a as kc}from"../chunks/runtime.D0CDJ9Th.js";import{s as Hc}from"../chunks/attributes.DMnjJEj8.js";import{b as Vc}from"../chunks/this.WoodGo2_.js";import{o as Gc}from"../chunks/index-client.DekTBza9.js";import{b as Wc}from"../chunks/paths.DZS3aTuw.js";/**
+import{a as Nc,t as Fc}from"../chunks/disclose-version.DSYjmPSD.js";import{O as Oc,R as Bc,g as Pt,s as zc,T as tr,W as io,V as nr,a as kc}from"../chunks/runtime.D0CDJ9Th.js";import{s as Hc}from"../chunks/attributes.DMnjJEj8.js";import{b as Vc}from"../chunks/this.WoodGo2_.js";import{o as Gc}from"../chunks/index-client.DekTBza9.js";import{b as Wc}from"../chunks/paths.D9s8Ukbv.js";/**
  * @license
  * Copyright 2010-2024 Three.js Authors
  * SPDX-License-Identifier: MIT

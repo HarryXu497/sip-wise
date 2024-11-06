@@ -1,1 +1,0 @@
-import{p as u}from"./proxy.WYylddmY.js";import{g as t,s,a as e}from"./runtime.D0CDJ9Th.js";import{o as l,a as n}from"./firebase.C4EL6l9v.js";let a=s(null),r=s(!1);const g={get value(){return t(a)},get loaded(){return t(r)},listen(){return l(n,o=>{e(r,!0),e(a,u(o))})}};export{g as u};
