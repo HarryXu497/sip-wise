@@ -6,7 +6,7 @@
 	import { Chart } from 'chart.js/auto';
 	import { Colors } from 'chart.js/auto';
 
-	import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
+	import { collection, query, where, onSnapshot, Timestamp, orderBy } from 'firebase/firestore';
 	import { onMount } from 'svelte';
 
 	interface DrinkTransaction {
@@ -16,17 +16,52 @@
 
 	type DrinkCounts = Record<DrinkType, number>;
 
-	let barChart = $state<HTMLCanvasElement>();
-	let chart = $state<Chart>();
+	let barChartElement = $state<HTMLCanvasElement>();
+	let stackedBarChartElement = $state<HTMLCanvasElement>();
+	let barChart = $state<Chart>();
+	let stackedBarChart = $state<Chart>();
 	let transactions = $state<DrinkTransaction[]>([]);
 	let drinkCounts = $state<DrinkCounts>({
 		water: 0,
 		juice: 0,
 		pop: 0
 	});
-	let doneLoading = $state(false);
+	const formatter =  new Intl.DateTimeFormat('en-CA', {
+		dateStyle: 'medium',
+		timeStyle: 'medium',
+	});
+
+	let transactionsAsDatasets = $derived.by(() => {
+		return transactions.map(transaction => {
+			const [backgroundColor, borderColor] = getColor(transaction.type);
+
+			return {
+				label: formatter.format(transaction.timestamp.toDate()),
+				data: [1],
+				backgroundColor: [
+					backgroundColor
+				],
+				borderColor: [
+					borderColor,
+				],
+				borderWidth: 2,
+			}
+		})
+	})
 
 	Chart.register(Colors);
+
+	function getColor(color: DrinkType): [string, string] {
+		if (color === 'water') {
+			return ["rgba(54, 162, 235, 0.5)", 'rgb(54, 162, 235)'];
+		} else if (color === 'juice') {
+			return ["rgba(255, 159, 64, 0.5)", "rgb(255, 159, 64)"];
+		} else if (color === 'pop') {
+			return ["rgba(255, 99, 132, 0.5)", "rgb(255, 99, 132)"];
+		} else {
+			throw Error("Invalid DrinkType.");
+		}
+	}
 
 	$effect(() => {
 		if (!user.value) {
@@ -52,7 +87,8 @@
 				Timestamp.fromDate(
 					new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1)
 				)
-			)
+			),
+			orderBy("timestamp", "asc"),
 		);
 
 		onSnapshot(q, (data) => {
@@ -77,7 +113,7 @@
 	});
 
 	onMount(() => {
-		chart = new Chart(barChart!, {
+		barChart = new Chart(barChartElement!, {
 			type: 'bar',
 			options: {
 				maintainAspectRatio: false,
@@ -88,18 +124,18 @@
 					},
 					title: {
 						display: true,
-						text: `${user.value?.displayName!}'s Drinks`,
+						text: `Your Drinks`,
 						color: 'hsl(353, 83%, 50%)',
 						font: {
 							family: "'Playfair Display', 'serif'",
-							size: 32
-						}
+							size: 32,
+						},
 					}
 				},
 				scales: {
 					y: {
 						suggestedMin: 0,
-						suggestedMax: 20
+						suggestedMax: 20,
 					}
 				}
 			},
@@ -115,23 +151,81 @@
 							'rgba(255, 99, 132, 0.5)'
 						],
 						borderColor: ['rgb(54, 162, 235)', 'rgb(255, 159, 64)', 'rgb(255, 99, 132)'],
-						borderWidth: 2
+						borderWidth: 2,
 					}
 				]
+			}
+		});
+
+		stackedBarChart = new Chart(stackedBarChartElement!, {
+			type: 'bar',
+			options: {
+				maintainAspectRatio: false,
+				responsive: true,
+				plugins: {
+					legend: {
+						display: false
+					},
+					title: {
+						display: true,
+						text: ["Your Drinks", "Ordered"],
+						color: 'hsl(353, 83%, 50%)',
+						font: {
+							family: "'Playfair Display', 'serif'",
+							size: 32
+						}
+					},
+				},
+				scales: {
+					y: {
+						suggestedMin: 0,
+						suggestedMax: 20,
+						stacked: true,
+					},
+					x: {
+						stacked: true,
+					}
+				}
+			},
+			data: {
+				labels: ["Your Drinks"],
+				datasets: transactions.map(transaction => {
+					const [backgroundColor, borderColor] = getColor(transaction.type);
+
+					return {
+						label: transaction.timestamp.toDate().toDateString(),
+						data: [1],
+						backgroundColor: [
+							backgroundColor
+						],
+						borderColor: [
+							borderColor,
+						],
+						borderWidth: 2,
+					}
+				}),
 			}
 		});
 	});
 
 	$effect(() => {
-		if (!chart) {
+		if (!barChart) {
 			return;
 		}
 
-		doneLoading = true;
+		barChart.data.datasets[0].data = [drinkCounts['water'], drinkCounts['juice'], drinkCounts['pop']];
+		
+		barChart.update();
+	});
 
-		chart.data.datasets[0].data = [drinkCounts['water'], drinkCounts['juice'], drinkCounts['pop']];
+	$effect(() => {
+		if (!stackedBarChart) {
+			return;
+		}
 
-		(chart.options.plugins!.title!.text = `${user.value?.displayName!}'s Drinks`), chart.update();
+		stackedBarChart.data.datasets = transactionsAsDatasets;
+		
+		stackedBarChart.update();
 	});
 </script>
 
@@ -140,8 +234,16 @@
 		{#snippet header()}
 			<p class="header-text">visualize.exe</p>
 		{/snippet}
-		<div class="container">
-			<canvas bind:this={barChart}> </canvas>
+		<div class="container-bar">
+			<canvas bind:this={barChartElement}> </canvas>
+		</div>
+	</Card>
+	<Card>
+		{#snippet header()}
+			<p class="header-text">visualize.exe</p>
+		{/snippet}
+		<div class="container-stacked">
+			<canvas bind:this={stackedBarChartElement}> </canvas>
 		</div>
 	</Card>
 </main>
@@ -152,12 +254,19 @@
 	@include exports.header-text();
 
 	main {
+		display: flex;
+		flex-direction: column;
+		gap: 3rem;
 		margin: 3rem auto;
 		width: clamp(32rem, 50%, 64rem);
 	}
 
-	.container {
+	.container-bar {
 		min-height: 24rem;
+	}
+
+	.container-stacked {
+		min-height: 32rem;
 	}
 
 	canvas {
